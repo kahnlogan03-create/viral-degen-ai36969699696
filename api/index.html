@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viral Degen AI</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --red: #E24B4A;
+    --amber: #EF9F27;
+    --gray-900: #0a0a0a;
+    --gray-800: #111111;
+    --gray-700: #1a1a1a;
+    --gray-600: #242424;
+    --gray-500: #333333;
+    --gray-400: #555555;
+    --gray-300: #888888;
+    --gray-200: #aaaaaa;
+    --gray-100: #dddddd;
+    --white: #f5f5f0;
+  }
+
+  body {
+    background: var(--gray-900);
+    color: var(--white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .container { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .header { text-align: center; margin-bottom: 48px; }
+
+  .logo {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: clamp(48px, 10vw, 80px);
+    letter-spacing: -1px;
+    line-height: 0.95;
+    background: linear-gradient(135deg, var(--red) 0%, var(--amber) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .tagline {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gray-300);
+    text-transform: uppercase;
+  }
+
+  .divider {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--red), var(--amber));
+    margin: 20px auto;
+  }
+
+  .input-label {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gray-300);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  textarea {
+    flex: 1;
+    background: var(--gray-700);
+    border: 1px solid var(--gray-500);
+    border-radius: 8px;
+    color: var(--white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    padding: 14px 16px;
+    resize: none;
+    min-height: 60px;
+    transition: border-color 0.2s;
+    outline: none;
+    line-height: 1.5;
+  }
+
+  textarea::placeholder { color: var(--gray-400); }
+  textarea:focus { border-color: var(--red); }
+
+  .generate-btn {
+    background: linear-gradient(135deg, var(--red) 0%, var(--amber) 100%);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 800;
+    text-transform: uppercase;
+    font-size: 15px;
+    letter-spacing: 2px;
+    padding: 14px 24px;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.1s;
+    min-width: 110px;
+    align-self: stretch;
+  }
+
+  .generate-btn:hover { opacity: 0.9; }
+  .generate-btn:active { transform: scale(0.97); }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .toggle-row { display: flex; gap: 10px; margin-top: 14px; }
+
+  .video-type-btn {
+    background: var(--gray-700);
+    border: 1px solid var(--gray-500);
+    border-radius: 8px;
+    color: var(--gray-300);
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 8px 18px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .video-type-btn.active {
+    background: linear-gradient(135deg, var(--red), var(--amber));
+    border-color: transparent;
+    color: #fff;
+  }
+
+  .video-type-btn:not(.active):hover { border-color: var(--amber); color: var(--amber); }
+
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+  .example-pill {
+    background: var(--gray-700);
+    border: 1px solid var(--gray-500);
+    border-radius: 100px;
+    color: var(--gray-200);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 5px 12px;
+    transition: all 0.15s;
+    font-family: 'Courier New', monospace;
+  }
+
+  .example-pill:hover { border-color: var(--amber); color: var(--amber); background: rgba(239,159,39,0.08); }
+
+  .output-section { display: none; margin-top: 32px; }
+  .output-section.visible { display: block; }
+
+  .output-card {
+    background: var(--gray-700);
+    border: 1px solid var(--gray-500);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    background: var(--gray-600);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--gray-500);
+  }
+
+  .card-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 800;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--gray-200);
+  }
+
+  .badge {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .badge-red { background: rgba(226,75,74,0.2); color: var(--red); border: 1px solid rgba(226,75,74,0.3); }
+  .badge-amber { background: rgba(239,159,39,0.2); color: var(--amber); border: 1px solid rgba(239,159,39,0.3); }
+  .badge-green { background: rgba(99,153,34,0.2); color: #97C459; border: 1px solid rgba(99,153,34,0.3); }
+
+  .card-body { padding: 20px; }
+
+  .hook-text {
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 16px;
+    color: var(--white);
+  }
+
+  .hook-text span {
+    background: linear-gradient(135deg, var(--red), var(--amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .meta-label {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--gray-300);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .viral-score { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .score-bar { flex: 1; height: 4px; background: var(--gray-500); border-radius: 2px; overflow: hidden; }
+  .score-fill { height: 100%; background: linear-gradient(90deg, var(--red), var(--amber)); border-radius: 2px; transition: width 0.5s ease; }
+  .score-num { font-family: 'Courier New', monospace; font-size: 12px; color: var(--amber); min-width: 32px; text-align: right; }
+
+  .timestamps {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--gray-500);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .timestamp-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    border-bottom: 1px solid var(--gray-600);
+  }
+
+  .timestamp-row:last-child { border-bottom: none; }
+
+  .ts-time {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--amber);
+    padding: 10px 14px;
+    border-right: 1px solid var(--gray-600);
+    background: rgba(239,159,39,0.05);
+    display: flex;
+    align-items: center;
+  }
+
+  .ts-action { font-size: 13px; color: var(--gray-100); padding: 10px 14px; line-height: 1.4; }
+
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+
+  .meta-item { background: var(--gray-600); border-radius: 8px; padding: 12px 14px; }
+  .meta-item .meta-label { margin-bottom: 4px; }
+  .meta-value { font-size: 13px; color: var(--white); font-weight: 500; }
+
+  .caption-box { background: var(--gray-600); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+  .caption-value { font-size: 18px; font-weight: 600; color: var(--white); font-style: italic; }
+
+  .audio-box {
+    background: rgba(239,159,39,0.08);
+    border: 1px solid rgba(239,159,39,0.2);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .audio-label { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: var(--amber); text-transform: uppercase; margin-bottom: 4px; }
+  .audio-value { font-size: 13px; color: var(--gray-100); }
+
+  .why-works {
+    background: rgba(226,75,74,0.08);
+    border: 1px solid rgba(226,75,74,0.2);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .why-label { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: var(--red); text-transform: uppercase; margin-bottom: 8px; }
+  .why-text { font-size: 13px; color: var(--gray-100); line-height: 1.6; }
+
+  .regen-btn {
+    background: transparent;
+    border: 1px solid var(--gray-500);
+    border-radius: 8px;
+    color: var(--gray-200);
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 10px 18px;
+    transition: all 0.2s;
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .regen-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* CHATBOT */
+  .chat-section {
+    margin-top: 32px;
+    border: 1px solid var(--gray-500);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+  }
+
+  .chat-header {
+    background: var(--gray-600);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--gray-500);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chat-header-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--red), var(--amber));
+  }
+
+  .chat-header-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 800;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--gray-200);
+  }
+
+  .chat-header-sub {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--gray-400);
+    margin-left: auto;
+  }
+
+  .chat-messages {
+    background: var(--gray-800);
+    padding: 16px;
+    min-height: 120px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .chat-msg {
+    display: flex;
+    gap: 10px;
+    animation: slideUp 0.2s ease;
+  }
+
+  .chat-msg.user { flex-direction: row-reverse; }
+
+  .chat-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .chat-avatar.ai {
+    background: linear-gradient(135deg, var(--red), var(--amber));
+    color: #fff;
+  }
+
+  .chat-avatar.user {
+    background: var(--gray-600);
+    color: var(--gray-200);
+    font-family: 'Courier New', monospace;
+  }
+
+  .chat-bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .chat-msg.ai .chat-bubble {
+    background: var(--gray-700);
+    border: 1px solid var(--gray-500);
+    color: var(--white);
+    border-top-left-radius: 2px;
+  }
+
+  .chat-msg.user .chat-bubble {
+    background: linear-gradient(135deg, rgba(226,75,74,0.25), rgba(239,159,39,0.25));
+    border: 1px solid rgba(239,159,39,0.3);
+    color: var(--white);
+    border-top-right-radius: 2px;
+  }
+
+  .chat-typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .chat-typing span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gray-400);
+    animation: typingDot 1.2s infinite;
+  }
+
+  .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingDot {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  .chat-input-area {
+    background: var(--gray-700);
+    border-top: 1px solid var(--gray-500);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--gray-600);
+    border: 1px solid var(--gray-500);
+    border-radius: 8px;
+    color: var(--white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    resize: none;
+    outline: none;
+    min-height: 42px;
+    max-height: 120px;
+    line-height: 1.4;
+    transition: border-color 0.2s;
+  }
+
+  .chat-input::placeholder { color: var(--gray-400); }
+  .chat-input:focus { border-color: var(--amber); }
+
+  .chat-send-btn {
+    background: linear-gradient(135deg, var(--red), var(--amber));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 16px;
+    transition: opacity 0.2s, transform 0.1s;
+    flex-shrink: 0;
+    align-self: flex-end;
+    height: 42px;
+  }
+
+  .chat-send-btn:hover { opacity: 0.9; }
+  .chat-send-btn:active { transform: scale(0.95); }
+  .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--gray-700);
+    border-top: 1px solid var(--gray-600);
+  }
+
+  .quick-reply {
+    background: var(--gray-600);
+    border: 1px solid var(--gray-500);
+    border-radius: 100px;
+    color: var(--gray-200);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    padding: 5px 12px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .quick-reply:hover { border-color: var(--amber); color: var(--amber); background: rgba(239,159,39,0.08); }
+
+  .loading { text-align: center; padding: 40px 0; display: none; }
+  .loading.visible { display: block; }
+  .loading-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 800;
+    text-transform: uppercase;
+    font-size: 22px;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--red), var(--amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .error-box {
+    background: rgba(226,75,74,0.1);
+    border: 1px solid rgba(226,75,74,0.3);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--red);
+    font-size: 13px;
+    display: none;
+    margin-top: 12px;
+  }
+
+  .error-box.visible { display: block; }
+
+  .vault-section { margin-bottom: 32px; border: 1px solid var(--gray-500); border-radius: 12px; overflow: hidden; }
+  .vault-header { background: var(--gray-600); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+  .vault-header:hover { background: var(--gray-500); }
+  .vault-header-left { display: flex; align-items: center; gap: 10px; }
+  .vault-icon { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--amber), var(--red)); }
+  .vault-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: 3px; color: var(--gray-200); }
+  .vault-count { font-family: 'Courier New', monospace; font-size: 10px; color: var(--amber); background: rgba(239,159,39,0.15); border: 1px solid rgba(239,159,39,0.3); border-radius: 100px; padding: 2px 8px; }
+  .vault-toggle { font-size: 12px; color: var(--gray-300); transition: transform 0.2s; }
+  .vault-toggle.open { transform: rotate(180deg); }
+  .vault-body { background: var(--gray-800); display: none; padding: 16px; }
+  .vault-body.open { display: block; }
+  .vault-videos { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .vault-video-card { background: var(--gray-700); border: 1px solid var(--gray-500); border-radius: 8px; overflow: hidden; }
+  .vault-video-header { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-600); }
+  .vault-video-name { font-size: 13px; font-weight: 500; color: var(--white); flex: 1; }
+  .vault-video-stats { display: flex; gap: 6px; align-items: center; margin: 0 10px; }
+  .vault-stat { font-family: 'Courier New', monospace; font-size: 10px; color: var(--amber); background: rgba(239,159,39,0.1); border: 1px solid rgba(239,159,39,0.2); border-radius: 4px; padding: 2px 6px; }
+  .vault-delete-btn { background: none; border: none; color: var(--gray-400); cursor: pointer; font-size: 14px; padding: 0 4px; transition: color 0.15s; }
+  .vault-delete-btn:hover { color: var(--red); }
+  .vault-transcript-preview { padding: 8px 14px; font-size: 12px; color: var(--gray-300); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vault-add-form { background: var(--gray-700); border: 1px solid var(--gray-500); border-radius: 8px; padding: 14px; }
+  .vault-add-label { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: var(--gray-300); text-transform: uppercase; margin-bottom: 10px; display: block; }
+  .vault-form-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .vault-input { background: var(--gray-600); border: 1px solid var(--gray-500); border-radius: 6px; color: var(--white); font-family: -apple-system, sans-serif; font-size: 13px; padding: 8px 12px; outline: none; transition: border-color 0.2s; }
+  .vault-input::placeholder { color: var(--gray-400); }
+  .vault-input:focus { border-color: var(--amber); }
+  .vault-input.name { flex: 1; min-width: 120px; }
+  .vault-input.views { width: 90px; }
+  .vault-input.likes { width: 80px; }
+  .vault-textarea { width: 100%; background: var(--gray-600); border: 1px solid var(--gray-500); border-radius: 6px; color: var(--white); font-family: -apple-system, sans-serif; font-size: 12px; padding: 10px 12px; resize: vertical; min-height: 80px; outline: none; line-height: 1.5; transition: border-color 0.2s; margin-bottom: 8px; }
+  .vault-textarea::placeholder { color: var(--gray-400); }
+  .vault-textarea:focus { border-color: var(--amber); }
+  .vault-add-btn { background: linear-gradient(135deg, var(--amber), var(--red)); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 1px; padding: 8px 16px; text-transform: uppercase; transition: opacity 0.2s; }
+  .vault-add-btn:hover { opacity: 0.85; }
+  .vault-empty { text-align: center; padding: 16px; color: var(--gray-400); font-size: 12px; font-family: 'Courier New', monospace; margin-bottom: 14px; }
+  .vault-fetch-row { display: flex; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-600); }
+  .vault-url-input { flex: 1; background: var(--gray-600); border: 1px solid var(--gray-500); border-radius: 6px; color: var(--white); font-family: -apple-system, sans-serif; font-size: 13px; padding: 8px 12px; outline: none; transition: border-color 0.2s; }
+  .vault-url-input::placeholder { color: var(--gray-400); }
+  .vault-url-input:focus { border-color: var(--amber); }
+  .vault-fetch-btn { background: var(--gray-600); border: 1px solid var(--amber); border-radius: 6px; color: var(--amber); cursor: pointer; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 1px; padding: 8px 14px; text-transform: uppercase; transition: all 0.2s; white-space: nowrap; }
+  .vault-fetch-btn:hover { background: rgba(239,159,39,0.15); }
+  .vault-fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .vault-fetch-status { font-family: 'Courier New', monospace; font-size: 11px; color: var(--gray-300); margin-bottom: 8px; min-height: 16px; }
+  .vault-fetch-status.success { color: #97C459; }
+  .vault-fetch-status.error { color: var(--red); }
+  .vault-or-divider { text-align: center; font-family: 'Courier New', monospace; font-size: 10px; color: var(--gray-400); letter-spacing: 2px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="container">
+
+  <div class="header">
+    <div class="logo">Viral<br>Degen AI</div>
+    <div class="divider"></div>
+    <div class="tagline">Drop a scene. Get a banger.</div>
+  </div>
+
+  <div class="vault-section">
+    <div class="vault-header" onclick="toggleVault()">
+      <div class="vault-header-left">
+        <div class="vault-icon"></div>
+        <span class="vault-title">Viral Vault</span>
+        <span class="vault-count" id="vault-count">0 videos</span>
+      </div>
+      <span class="vault-toggle" id="vault-toggle">▼</span>
+    </div>
+    <div class="vault-body" id="vault-body">
+      <div class="vault-videos" id="vault-videos">
+        <div class="vault-empty" id="vault-empty">No videos saved yet. Add transcripts from your best performing videos below.</div>
+      </div>
+      <div class="vault-add-form">
+        <span class="vault-add-label">+ Add Viral Video</span>
+        <div class="vault-fetch-row">
+          <input class="vault-url-input" id="vault-url" placeholder="Paste Instagram or TikTok reel URL..." />
+          <button class="vault-fetch-btn" id="vault-fetch-btn" onclick="fetchTranscript()">⚡ FETCH</button>
+        </div>
+        <div class="vault-fetch-status" id="vault-fetch-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 32px;">
+    <span class="input-label">Describe your scene or situation</span>
+    <div class="input-wrapper">
+      <textarea id="scene-input" placeholder="e.g. i'm in my car in the middle of the desert" rows="2"></textarea>
+      <button class="generate-btn" id="gen-btn" onclick="generateIdea()">COOK IT</button>
+    </div>
+    <div class="toggle-row">
+      <button class="video-type-btn active" id="btn-talking" onclick="setVideoType('talking')">🎤 TALKING</button>
+      <button class="video-type-btn" id="btn-silent" onclick="setVideoType('silent')">🔇 NO TALKING</button>
+    </div>
+    <div class="examples">
+      <span class="example-pill" onclick="setExample(this)">driving on the highway at night</span>
+      <span class="example-pill" onclick="setExample(this)">at the gym at 3am</span>
+      <span class="example-pill" onclick="setExample(this)">on my balcony with a monster</span>
+      <span class="example-pill" onclick="setExample(this)">at a casino in vegas</span>
+      <span class="example-pill" onclick="setExample(this)">pulling up to a restaurant in the corvette</span>
+      <span class="example-pill" onclick="setExample(this)">just woke up in a hotel room</span>
+    </div>
+  </div>
+
+  <div class="error-box" id="error-box"></div>
+  <div class="loading" id="loading"><div class="loading-text">COOKING...</div></div>
+
+  <div class="output-section" id="output-section">
+    <div class="output-card">
+      <div class="card-header">
+        <span class="card-title">VIRAL IDEA</span>
+        <span class="badge badge-red" id="viral-label">DEGENERATE</span>
+      </div>
+      <div class="card-body">
+        <div class="hook-text" id="hook-text"></div>
+
+        <div class="meta-label">Viral Score</div>
+        <div class="viral-score">
+          <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+          <div class="score-num" id="score-num">0%</div>
+        </div>
+
+        <div class="meta-label">Timestamps</div>
+        <div class="timestamps" id="timestamps"></div>
+
+        <div class="meta-grid">
+          <div class="meta-item"><div class="meta-label">Duration</div><div class="meta-value" id="duration"></div></div>
+          <div class="meta-item"><div class="meta-label">Format</div><div class="meta-value" id="format"></div></div>
+          <div class="meta-item"><div class="meta-label">Hook Type</div><div class="meta-value" id="hook-type"></div></div>
+          <div class="meta-item"><div class="meta-label">Energy</div><div class="meta-value" id="energy"></div></div>
+        </div>
+
+        <div class="caption-box">
+          <div class="meta-label">Caption</div>
+          <div class="caption-value" id="caption-val"></div>
+        </div>
+
+        <div class="audio-box">
+          <div class="audio-label">Audio Direction</div>
+          <div class="audio-value" id="audio-val"></div>
+        </div>
+
+        <div class="why-works">
+          <div class="why-label">Why This Goes Viral</div>
+          <div class="why-text" id="why-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="regen-btn" onclick="generateIdea()">↻ REGENERATE DIFFERENT IDEA</button>
+
+    <!-- CHATBOT -->
+    <div class="chat-section" id="chat-section">
+      <div class="chat-header">
+        <div class="chat-header-dot"></div>
+        <span class="chat-header-title">Refine This Idea</span>
+        <span class="chat-header-sub">Give feedback or tweak it</span>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="quick-replies">
+        <span class="quick-reply" onclick="sendQuick(this)">make it shorter</span>
+        <span class="quick-reply" onclick="sendQuick(this)">make it funnier</span>
+        <span class="quick-reply" onclick="sendQuick(this)">add a better hook</span>
+        <span class="quick-reply" onclick="sendQuick(this)">change the setting</span>
+        <span class="quick-reply" onclick="sendQuick(this)">make it more degen</span>
+        <span class="quick-reply" onclick="sendQuick(this)">give me a completely different angle</span>
+        <span class="quick-reply" onclick="sendQuick(this)">add a quotable line</span>
+        <span class="quick-reply" onclick="sendQuick(this)">write the full script</span>
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chat-input" placeholder="Give feedback on the idea... e.g. 'make it shorter' or 'change the setting to the car'" rows="1"></textarea>
+        <button class="chat-send-btn" id="chat-send-btn" onclick="sendChat()">↑</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SYSTEM_PROMPT = `You are Viral Degen AI — a video idea generator and creative director trained on the content style of Logan Kahn (@logankahnn).
+
+Logan's brand: Miami-based, anti-aspirational wealth flex, cigarettes (Marlboro Reds), Monster energy, Corvette, gambling (Rainbet sponsor), fitness satire, Gen Z nihilism, "dialed/optimal" language. Balcony with city view is his signature set. Xbox headset. Sunglasses. Fairlife protein shakes.
+
+His proven viral formula:
+- Under 7 seconds = 1.37M avg views
+- One-word or no caption crushes: "real", "dialed", "never", "yes"
+- Hook in second 1 — creates a question or tension instantly
+- Unexpected flip or payoff
+- Authentic, zero polish
+- Ironic CTA: "Follow for more fitness tips"
+- Original audio beats licensed music
+- Controversy or quotable line = shares
+
+His best video formats:
+1. Balcony fitness tips — absurdist advice delivered with complete confidence, signature items on table, "what up fat f*cks" opener, "follow for more fitness tips" closer
+2. Car rants — seated in car, direct to camera, bait-and-switch logic ("step one is don't quit")
+3. Silent flex — short clips showing lifestyle, music carries it
+4. Challenge/physical bit — doing something visually insane
+
+Top performing videos for context:
+- "marbeezy or nothing" 15M views, 4 secs — lost something in Corvette
+- "work smarter" 5M views, 3 secs — gambling math while driving
+- "Dialed" 90K views, 26 secs — ice tartar fast, "build it up so you can destroy it"
+- Car nicotine method 250K views, 27 secs — "step one is don't quit, quitters are losers"
+- Pregame blackout 917K views, 7 secs — strobe lights chaos
+
+Accounts he studies: Mason Capodanno (bait-and-switch), steezforprez (mystery/silence), drunkdorkz (subversion), togi (villain persona), sooshbrah (ironic health flex).
+
+You have two modes:
+1. IDEA GENERATION — when given a scene, generate a full video idea as JSON
+2. CHAT/REFINEMENT — when given feedback on an existing idea, respond conversationally and refine the concept. Be direct, no fluff, talk like a creative director who knows Logan's style cold.
+
+For IDEA GENERATION return ONLY this JSON:
+{
+  "hook": "concept in one punchy sentence",
+  "viral_score": 87,
+  "viral_label": "NUCLEAR" or "DEGENERATE" or "DIALED" or "OPTIMAL" or "MARBEEZY",
+  "timestamps": [{"time": "0:00", "action": "what happens / what is said"}],
+  "duration": "X seconds",
+  "format": "POV / Skit / Rant / Flex / Challenge",
+  "hook_type": "Bait & Switch / Question / Shock / Relatable / Mystery",
+  "energy": "Deadpan / Chaotic / Confident / Silent / Unhinged",
+  "caption": "one word",
+  "audio": "original audio — [vibe description] OR [song type]",
+  "why_viral": "2-3 sentences on exactly why this hits."
+}
+
+For CHAT mode just respond in plain text, conversationally. Be sharp and specific.`;
+
+const ASSEMBLYAI_KEY = '81d17934ba7847dd93d368179afef209';
+const BLOTATO_KEY = 'ak_c1e8c4c6c251222c982c62ddcfeab8818abbe8e014a416a3a83d72423a426412';
+
+async function fetchTranscript() {
+  const urlInput = document.getElementById('vault-url');
+  const url = urlInput.value.trim();
+  if (!url) { urlInput.focus(); return; }
+
+  const btn = document.getElementById('vault-fetch-btn');
+  const status = document.getElementById('vault-fetch-status');
+
+  btn.disabled = true;
+  status.className = 'vault-fetch-status';
+  status.textContent = 'Submitting...';
+
+  try {
+    // Step 1: Submit to Blotato via our own backend (no CORS)
+    const submitRes = await fetch('/api/blotato', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'submit', url })
+    });
+
+    const submitData = await submitRes.json();
+    if (!submitRes.ok || !submitData.id) throw new Error(submitData.error || 'Submission failed');
+
+    const sourceId = submitData.id;
+    status.textContent = 'Processing video...';
+
+    // Step 2: Poll until complete
+    let result = null;
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      status.textContent = `Processing... ${(i+1)*3}s`;
+
+      const pollRes = await fetch('/api/blotato', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'poll', sourceId })
+      });
+
+      const pollData = await pollRes.json();
+
+      if (pollData.status === 'completed' && pollData.result) {
+        result = typeof pollData.result === 'string' ? pollData.result : JSON.stringify(pollData.result);
+        break;
+      }
+      if (pollData.status === 'failed') throw new Error(pollData.errorMessage || 'Processing failed');
+    }
+
+    if (!result) throw new Error('Timed out — try again');
+
+    const urlParts = url.split('/').filter(p => p && p !== '');
+    const autoName = urlParts[urlParts.length - 1]?.substring(0, 40) || 'Reel';
+    vaultVideos.push({ id: Date.now(), name: autoName, views: '', likes: '', transcript: result });
+    renderVault();
+    urlInput.value = '';
+
+    status.className = 'vault-fetch-status success';
+    status.textContent = 'Saved to vault.';
+
+  } catch(err) {
+    status.className = 'vault-fetch-status error';
+    status.textContent = 'Error: ' + (err.message || 'Something went wrong.');
+    console.error(err);
+  }
+
+  btn.disabled = false;
+}
+let currentIdea = null;
+let chatHistory = [];
+let vaultVideos = [];
+
+function toggleVault() {
+  const body = document.getElementById('vault-body');
+  const toggle = document.getElementById('vault-toggle');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function updateVaultCount() {
+  const count = vaultVideos.length;
+  document.getElementById('vault-count').textContent = count + ' video' + (count !== 1 ? 's' : '');
+}
+
+function addToVault() {
+  // vault-add is now handled by fetchTranscript only
+}
+
+function removeFromVault(id) {
+  vaultVideos = vaultVideos.filter(v => v.id !== id);
+  renderVault();
+}
+
+function renderVault() {
+  const container = document.getElementById('vault-videos');
+  updateVaultCount();
+  if (vaultVideos.length === 0) {
+    container.innerHTML = '<div class="vault-empty">No videos saved yet. Paste a reel URL above to add one.</div>';
+    return;
+  }
+  container.innerHTML = '';
+  vaultVideos.forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'vault-video-card';
+    const preview = v.transcript.substring(0, 120) + (v.transcript.length > 120 ? '...' : '');
+    card.innerHTML = `
+      <div class="vault-video-header">
+        <span class="vault-video-name">${v.name}</span>
+        <div class="vault-video-stats"></div>
+        <button class="vault-delete-btn" onclick="removeFromVault(${v.id})">✕</button>
+      </div>
+      <div class="vault-transcript-preview">${preview}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function getVaultContext() {
+  if (vaultVideos.length === 0) return '';
+  let ctx = '\n\nVIRAL VAULT — Proven videos to draw inspiration from (use these as templates, not copies — same structure/energy but fresh angle):\n';
+  vaultVideos.forEach((v, i) => {
+    ctx += `\n[Vault Video ${i+1}] "${v.name}"`;
+    if (v.views) ctx += ` — ${v.views} views`;
+    if (v.likes) ctx += `, ${v.likes} likes`;
+    ctx += `\nTranscript: ${v.transcript}\n`;
+  });
+  return ctx;
+}
+
+function setVideoType(type) {
+  videoType = type;
+  document.getElementById('btn-talking').classList.toggle('active', type === 'talking');
+  document.getElementById('btn-silent').classList.toggle('active', type === 'silent');
+}
+
+async function generateIdea() {
+  const input = document.getElementById('scene-input').value.trim();
+  if (!input) { document.getElementById('scene-input').focus(); return; }
+
+  const btn = document.getElementById('gen-btn');
+  const loading = document.getElementById('loading');
+  const output = document.getElementById('output-section');
+  const error = document.getElementById('error-box');
+
+  btn.disabled = true;
+  loading.classList.add('visible');
+  output.classList.remove('visible');
+  error.classList.remove('visible');
+
+  const typeContext = videoType === 'talking'
+    ? 'TALKING — Logan speaks directly to camera. Include spoken lines in timestamps.'
+    : 'NO TALKING — silent, visual only. Text overlays + music. No dialogue in timestamps.';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: `Generate a video idea.\nScene: ${input}\nVideo type: ${typeContext}${getVaultContext()}` }]
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'API error ' + response.status);
+    const text = data.content.map(c => c.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    currentIdea = JSON.parse(clean);
+
+    renderIdea(currentIdea);
+    loading.classList.remove('visible');
+    output.classList.add('visible');
+
+    // Reset chat with intro message
+    chatHistory = [];
+    const chatMsgs = document.getElementById('chat-messages');
+    chatMsgs.innerHTML = '';
+    addChatMessage('ai', `Idea's cooked. Give me feedback — want it shorter, different setting, more degen, a full script? What needs changing?`);
+
+  } catch(err) {
+    loading.classList.remove('visible');
+    error.textContent = 'Error: ' + (err.message || 'Failed to generate. Try again.');
+    error.classList.add('visible');
+    console.error(err);
+  }
+
+  btn.disabled = false;
+}
+
+function renderIdea(idea) {
+  document.getElementById('hook-text').innerHTML = idea.hook.replace(/\*([^*]+)\*/g, '<span>$1</span>');
+
+  const score = Math.min(100, Math.max(0, idea.viral_score || 80));
+  setTimeout(() => {
+    document.getElementById('score-fill').style.width = score + '%';
+    document.getElementById('score-num').textContent = score + '%';
+  }, 100);
+
+  const labelEl = document.getElementById('viral-label');
+  labelEl.textContent = idea.viral_label || 'DEGENERATE';
+  labelEl.className = 'badge ' + (score >= 90 ? 'badge-red' : score >= 75 ? 'badge-amber' : 'badge-green');
+
+  const tsContainer = document.getElementById('timestamps');
+  tsContainer.innerHTML = '';
+  (idea.timestamps || []).forEach(ts => {
+    const row = document.createElement('div');
+    row.className = 'timestamp-row';
+    row.innerHTML = `<div class="ts-time">${ts.time}</div><div class="ts-action">${ts.action}</div>`;
+    tsContainer.appendChild(row);
+  });
+
+  document.getElementById('duration').textContent = idea.duration || '';
+  document.getElementById('format').textContent = idea.format || '';
+  document.getElementById('hook-type').textContent = idea.hook_type || '';
+  document.getElementById('energy').textContent = idea.energy || '';
+  document.getElementById('caption-val').textContent = '"' + (idea.caption || '') + '"';
+  document.getElementById('audio-val').textContent = idea.audio || '';
+  document.getElementById('why-text').textContent = idea.why_viral || '';
+}
+
+function addChatMessage(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  const avatar = role === 'ai' ? 'AI' : 'LK';
+  div.innerHTML = `
+    <div class="chat-avatar ${role}">${avatar}</div>
+    <div class="chat-bubble">${text}</div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ai';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="chat-avatar ai">AI</div>
+    <div class="chat-bubble"><div class="chat-typing"><span></span><span></span><span></span></div></div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const sendBtn = document.getElementById('chat-send-btn');
+  sendBtn.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  addChatMessage('user', msg);
+
+  chatHistory.push({ role: 'user', content: msg });
+
+  addTypingIndicator();
+
+  const ideaContext = currentIdea ? `\n\nCurrent idea:\n${JSON.stringify(currentIdea, null, 2)}` : '';
+
+  try {
+    const messages = [
+      { role: 'user', content: `You are in CHAT mode. The user has feedback on a video idea.${ideaContext}${getVaultContext()}\n\nUser feedback: ${chatHistory.map(m => m.role + ': ' + m.content).join('\n')}` }
+    ];
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: SYSTEM_PROMPT,
+        messages
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'API error');
+    const text = data.content.map(c => c.text || '').join('');
+
+    removeTypingIndicator();
+    addChatMessage('ai', text.replace(/\n/g, '<br>'));
+    chatHistory.push({ role: 'assistant', content: text });
+
+  } catch(err) {
+    removeTypingIndicator();
+    addChatMessage('ai', 'Error: ' + (err.message || 'Something went wrong'));
+    console.error(err);
+  }
+
+  sendBtn.disabled = false;
+}
+
+function sendQuick(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendChat();
+}
+
+function setExample(el) {
+  document.getElementById('scene-input').value = el.textContent;
+}
+
+document.getElementById('scene-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generateIdea(); }
+});
+
+document.getElementById('chat-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+</script>
+</body>
+</html>

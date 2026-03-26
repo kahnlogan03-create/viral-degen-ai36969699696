@@ -1,6 +1,6 @@
 const BLOTATO_KEY = 'ak_c1e8c4c6c251222c982c62ddcfeab8818abbe8e014a416a3a83d72423a426412';
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           source: { sourceType: 'tiktok', url },
-          customInstructions: `Give a full second-by-second breakdown with visual and audio details. For each timestamp include exactly what is shown on screen (setting, props, person's actions, facial expressions, text overlays) and exactly what is being said verbatim. Format: [0:00-0:03] VISUAL: ... AUDIO: ... Be as detailed as possible.`
+          customInstructions: `Give a full second-by-second breakdown with visual and audio details. For each timestamp include exactly what is shown on screen (setting, props, person actions, facial expressions, text overlays) and exactly what is being said verbatim. Format: [0:00-0:03] VISUAL: ... AUDIO: ... Be as detailed as possible.`
         })
       });
       const data = await response.json();
@@ -39,4 +39,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-}
+};
